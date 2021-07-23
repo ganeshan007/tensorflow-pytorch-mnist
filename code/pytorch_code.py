@@ -6,7 +6,7 @@ import numpy as np
 from pprint import pprint
 import sys
 from tqdm.auto import tqdm
-# sys.exit(0)
+import torchmetrics
 
 class Net(torch.nn.Module):
     def __init__(self,in_dim,out_dim):
@@ -39,16 +39,19 @@ num_epochs = 10
 for _ in range(num_epochs):
     epoch_loss = []
     test_epoch_loss = []
+    epoch_acc = []
     for batch in tqdm(train_dataloader):
         net.train()
         x, y = batch[0], batch[1]
         y1 = net(x)
         loss = criterion(y1,y)
+        acc = torchmetrics.functional.accuracy(y1,y)
+        epoch_acc.append(acc)
         optim.zero_grad()
         loss.backward()
         optim.step()
         epoch_loss.append(loss.item())
-    pprint(f'Epoch : {_}, Loss: {np.mean(epoch_loss)}')
+    pprint(f'Epoch : {_}, Loss: {np.mean(epoch_loss)}, Accuracy: {np.mean(epoch_acc)}')
     pprint('*'*50)
 
     net.eval()    
